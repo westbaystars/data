@@ -1,0 +1,38 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Teruaki Sato
+
+```elixir
+Mix.install([
+  {:explorer, "~> 0.3.1"},
+  {:kino, "~> 0.6.2"},
+  {:download, "~> 0.0.4"}
+])
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+:ok
+```
+
+## Intro
+
+Welcome back to the West Wing, analytic support staff to the Japan Baseball Weekly Podcast. I'm Michael Westbay.
+
+Several weeks ago on the English NPB Discord, some Tigers fans were lamenting a loss to the Carp as a "turning point" to Hanshin's fortunes. This was when they were riding that run before and after the All-Star break. The "turning point" comment seemed to be sarcastic irony at the time, and I continued with that sentiment by adding, "Turning point? Like the All-Star Game was for Teruaki last year?"
+
+Ooooo. One Tiger fan didn't take that comment as the humourous irony I had intended. My wife has commented in the past that my ironic remarks are sometimes too close to a painful truth for some people. But my impression of the Tigers' slugging sophmore was that he was still producing well. The Tigers had just won 8 of their last 11 games. The Tigers and Teruaki were nothing similar to the post All-Star collapse that they suffered last year.
+
+Well, a few weeks have gone by since then, and I'm starting to feel rather sorry for the plight the Tigers fans have been witnessing since that seeming "turning point" that one of them ironically called that loss.
+
+```elixir
+import Explorer.DataFrame
+alias Explorer.Series
+
+df =
+  from_csv!(
+    "/path/to/2022-batters-pitches-to-hits.tsv",
+    delimiter: "\t"
+  )
+```

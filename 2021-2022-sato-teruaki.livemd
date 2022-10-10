@@ -5,9 +5,95 @@
 ```elixir
 Mix.install([
   {:explorer, "~> 0.3.1"},
-  {:kino, "~> 0.6.2"},
+  {:kino, "~> 0.6"},
   {:download, "~> 0.0.4"}
 ])
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+Resolving Hex dependencies...
+Dependency resolution completed:
+New:
+  castore 0.1.18
+  certifi 2.9.0
+  download 0.0.4
+  explorer 0.3.1
+  hackney 1.18.1
+  httpoison 1.8.2
+  idna 6.1.1
+  kino 0.7.0
+  metrics 1.0.1
+  mimerl 1.2.0
+  parse_trans 3.3.1
+  rustler_precompiled 0.5.2
+  ssl_verify_fun 1.1.6
+  table 0.1.2
+  table_rex 3.1.1
+  unicode_util_compat 0.7.0
+* Getting explorer (Hex package)
+* Getting kino (Hex package)
+* Getting download (Hex package)
+* Getting httpoison (Hex package)
+* Getting hackney (Hex package)
+* Getting certifi (Hex package)
+* Getting idna (Hex package)
+* Getting metrics (Hex package)
+* Getting mimerl (Hex package)
+* Getting parse_trans (Hex package)
+* Getting ssl_verify_fun (Hex package)
+* Getting unicode_util_compat (Hex package)
+* Getting table (Hex package)
+* Getting rustler_precompiled (Hex package)
+* Getting table_rex (Hex package)
+* Getting castore (Hex package)
+==> table
+Compiling 5 files (.ex)
+Generated table app
+==> kino
+Compiling 36 files (.ex)
+Generated kino app
+===> Analyzing applications...
+===> Compiling unicode_util_compat
+===> Analyzing applications...
+===> Compiling idna
+===> Analyzing applications...
+===> Compiling mimerl
+==> ssl_verify_fun
+Compiling 7 files (.erl)
+Generated ssl_verify_fun app
+===> Analyzing applications...
+===> Compiling certifi
+==> table_rex
+Compiling 7 files (.ex)
+Generated table_rex app
+===> Analyzing applications...
+===> Compiling parse_trans
+===> Analyzing applications...
+===> Compiling metrics
+===> Analyzing applications...
+===> Compiling hackney
+==> castore
+Compiling 1 file (.ex)
+Generated castore app
+==> rustler_precompiled
+Compiling 4 files (.ex)
+Generated rustler_precompiled app
+==> explorer
+Compiling 18 files (.ex)
+
+20:45:33.606 [debug] Copying NIF from cache and extracting to /Users/westbay/Library/Caches/mix/installs/elixir-1.14.0-rc.0-erts-13.0.3/65652177ffe122cc7fea693c95bd4402/_build/dev/lib/explorer/priv/native/libexplorer-v0.3.1-nif-2.16-x86_64-apple-darwin.so
+Generated explorer app
+==> httpoison
+Compiling 3 files (.ex)
+Generated httpoison app
+==> download
+Compiling 1 file (.ex)
+warning: System.cwd/0 is deprecated. Use File.cwd/0 instead
+  lib/download.ex:46: Download.get_default_download_path/1
+
+Generated download app
 ```
 
 <!-- livebook:{"output":true} -->
@@ -20,19 +106,271 @@ Mix.install([
 
 Welcome back to the West Wing, analytic support staff to the Japan Baseball Weekly Podcast. I'm Michael Westbay.
 
-Several weeks ago on the English NPB Discord, some Tigers fans were lamenting a loss to the Carp as a "turning point" to Hanshin's fortunes. This was when they were riding that run before and after the All-Star break. The "turning point" comment seemed to be sarcastic irony at the time, and I continued with that sentiment by adding, "Turning point? Like the All-Star Game was for Teruaki last year?"
+Shortly after the All-Star break on the English NPB Discord, some Tigers fans were lamenting a loss to the Carp as a "turning point" to Hanshin's fortunes. At the time, they were riding a great run before and after the All-Star break. The "turning point" comment seemed to be sarcastic irony to me, and I continued with that sentiment by adding, "Turning point? Like the All-Star Game was for Teruaki last year?"
 
-Ooooo. One Tiger fan didn't take that comment as the humourous irony I had intended. My wife has commented in the past that my ironic remarks are sometimes too close to a painful truth for some people. But my impression of the Tigers' slugging sophmore was that he was still producing well. The Tigers had just won 8 of their last 11 games. The Tigers and Teruaki were nothing similar to the post All-Star collapse that they suffered last year.
+Ooooo. One Tiger fan didn't take that comment as the humourous irony I had intended. My wife has commented in the past that my ironic remarks are sometimes too close to a painful truth for some people. But my impression of the Tigers' slugging sophmore at the time was that he was still producing well. The Tigers had just won 8 of their last 11 games. The Tigers and Teruaki were performing nothing similar to the post All-Star collapse that they suffered last year.
 
-Well, a few weeks have gone by since then, and I'm starting to feel rather sorry for the plight the Tigers fans have been witnessing since that seeming "turning point" that one of them ironically called that loss.
+Well, a few weeks later I starting to feel rather sorry for the plight that the Tigers fans have been witnessing since that seeming "turning point" that one of them ironically called that loss.
+
+## Initialize the DataFrame
 
 ```elixir
-import Explorer.DataFrame
-alias Explorer.Series
+alias Explorer.DataFrame, as: DF
+alias Explorer.Series, as: S
 
-df =
-  from_csv!(
-    "/path/to/2022-batters-pitches-to-hits.tsv",
-    delimiter: "\t"
-  )
+show_table = fn df ->
+  keys = DF.names(df)
+
+  df
+  |> DF.to_rows()
+  |> Kino.DataTable.new(keys: keys, limit: 30)
+end
+
+unless File.exists?("2021-2022-sato-teruaki-at-bats.tsv"),
+  do:
+    {:ok, _filename} =
+      Download.from(
+        "https://raw.githubusercontent.com/westbaystars/data/main/2021-2022-sato-teruaki-at-bats.tsv"
+      )
+
+df = DF.from_csv!("2021-2022-sato-teruaki-at-bats.tsv", delimiter: "\t")
 ```
+
+<!-- livebook:{"output":true} -->
+
+```
+#Explorer.DataFrame<
+  Polars[1058 x 12]
+  Player string ["Sato, Teruaki", "Sato, Teruaki", "Sato, Teruaki", "Sato, Teruaki",
+   "Sato, Teruaki", ...]
+  選手 string ["佐藤 輝明", "佐藤 輝明", "佐藤 輝明", "佐藤 輝明",
+   "佐藤 輝明", ...]
+  Side string ["left", "left", "left", "left", "left", ...]
+  Team string ["HAN", "HAN", "HAN", "HAN", "HAN", ...]
+  Date string ["2022-04-24", "2022-04-24", "2022-04-24", "2022-04-24", "2022-04-24", ...]
+  Game integer [71800, 71800, 71800, 71800, 71800, ...]
+  Pitch string ["straight", "straight", "shoot", "split-finger", "straight", ...]
+  Pitches integer [1, 6, 2, 7, 6, ...]
+  Velocity integer [143, 143, nil, 138, 144, ...]
+  Location string ["3,3", "2,4", "4,4", "4,5", "4,3", ...]
+  ResultType string ["hit", "strikeout", "hit", "strikeout", "strikeout", ...]
+  Result string ["home-run", "called", "single", "swinging", "swinging", ...]
+>
+```
+
+## Data Manipulation Module
+
+```elixir
+defmodule Delta do
+  alias Explorer.Series, as: S
+
+  def one_if_in(series, values) do
+    S.transform(series, fn item ->
+      if item in values, do: 1, else: 0
+    end)
+  end
+
+  @p1 Date.range(~D[2021-03-26], ~D[2021-07-14])
+  @p2 Date.range(~D[2021-08-13], ~D[2021-11-05])
+  @p3 Date.range(~D[2022-03-25], ~D[2022-07-24])
+  @p4 Date.range(~D[2022-07-29], ~D[2022-10-07])
+
+  def date_to_period(dates) do
+    S.transform(dates, fn date ->
+      date = Date.from_iso8601!(date)
+
+      cond do
+        date in @p1 or date in @p3 -> "p1"
+        date in @p2 or date in @p4 -> "p2"
+        true -> "unknown"
+      end
+    end)
+  end
+
+  def date_to_year(dates) do
+    S.transform(dates, fn date ->
+      date = Date.from_iso8601!(date)
+      date.year
+    end)
+  end
+
+  @doc """
+  Divide the given `num` (numerator) by `den` (denominator) Series after casting them to :float.
+  """
+  def divide(num, den) do
+    S.divide(num |> S.cast(:float), den |> S.cast(:float))
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Delta, <<70, 79, 82, 49, 0, 0, 15, ...>>, {:divide, 2}}
+```
+
+## Analysis
+
+```elixir
+df
+|> DF.mutate(Year: &Delta.date_to_year(&1["Date"]))
+|> DF.mutate(Period: &Delta.date_to_period(&1["Date"]))
+|> DF.mutate(ResultTypes: &S.cast(&1["ResultType"], :string))
+|> DF.group_by(["Year", "ResultTypes", "Period"])
+|> DF.summarise(ResultType: [:count])
+|> DF.pivot_wider("ResultTypes", "ResultType_count", id_columns: ["Year", "Period"])
+|> DF.arrange(asc: "Year", asc: "Period")
+|> show_table.()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+
+12:58:39.835 [error] GenServer Kino.Terminator terminating
+** (FunctionClauseError) no function clause matching in Kino.Terminator.handle_info/2
+    (kino 0.7.0) lib/kino/terminator.ex:27: Kino.Terminator.handle_info({:terminate, #PID<0.3286.0>}, %{})
+    (stdlib 4.0.1) gen_server.erl:1123: :gen_server.try_dispatch/4
+    (stdlib 4.0.1) gen_server.erl:1200: :gen_server.handle_msg/6
+    (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+Last message: {:terminate, #PID<0.3286.0>}
+State: %{}
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+```
+
+```elixir
+at_bats = ["hit", "out", "strikeout", "strikeout-advance", "error"]
+
+periods_df =
+  df
+  |> DF.mutate(Year: &Delta.date_to_year(&1["Date"]))
+  |> DF.mutate(Period: &Delta.date_to_period(&1["Date"]))
+  |> DF.mutate(AtBat: &Delta.one_if_in(&1["ResultType"], at_bats))
+  |> DF.mutate(Hits: &Delta.one_if_in(&1["ResultType"], ["hit"]))
+  |> DF.mutate(HomeRuns: &Delta.one_if_in(&1["Result"], ["home-run"]))
+  |> DF.group_by(["Year", "Period"])
+  |> DF.summarise(Date: [:n_distinct], AtBat: [:sum], Hits: [:sum], HomeRuns: [:sum])
+  |> DF.rename(
+    Date_n_distinct: "Games",
+    AtBat_sum: "AtBats",
+    Hits_sum: "Hits",
+    HomeRuns_sum: "HomeRuns"
+  )
+  |> DF.arrange(asc: "Period", asc: "Year")
+
+periods_df
+|> show_table.()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+
+12:58:39.851 [error] GenServer Kino.Terminator terminating
+** (FunctionClauseError) no function clause matching in Kino.Terminator.handle_info/2
+    (kino 0.7.0) lib/kino/terminator.ex:27: Kino.Terminator.handle_info({:terminate, #PID<0.3288.0>}, %{})
+    (stdlib 4.0.1) gen_server.erl:1123: :gen_server.try_dispatch/4
+    (stdlib 4.0.1) gen_server.erl:1200: :gen_server.handle_msg/6
+    (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+Last message: {:terminate, #PID<0.3288.0>}
+State: %{}
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
+  (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1295: Explorer.DataFrame.df_for_mutations/2
+  (explorer 0.3.1) lib/explorer/data_frame.ex:1284: Explorer.DataFrame.mutate/2
+  (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
+  (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
+
+```
+
+My initial analysis of Teruaki's performance between the four segments of his career suffers from a lack of common denominator. That is, he played 10 more game in the first half of 2022 than 2021 and 7 more games in the second half of this season than last. While that may not be a lot of games different, it's 60 and 68 at bats different, respectively. So saying that his hit output improved by 16 while his home runs dropped by 5 for the first half and he had 26 more hits while only hitting one more home run in the second half leaves out a bit of context.
+
+```elixir
+periods_df
+|> DF.mutate_with(&[Avg: Delta.divide(&1["Hits"], &1["AtBats"])])
+|> DF.mutate_with(&[HRperAB: Delta.divide(&1["HomeRuns"], &1["AtBats"])])
+|> DF.mutate_with(&[HRperG: Delta.divide(&1["HomeRuns"], &1["Games"])])
+|> DF.arrange(asc: "Period", asc: "Year")
+|> show_table.()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+
+15:03:40.809 [error] GenServer Kino.Terminator terminating
+** (FunctionClauseError) no function clause matching in Kino.Terminator.handle_info/2
+    (kino 0.7.0) lib/kino/terminator.ex:27: Kino.Terminator.handle_info({:terminate, #PID<0.3362.0>}, %{})
+    (stdlib 4.0.1) gen_server.erl:1123: :gen_server.try_dispatch/4
+    (stdlib 4.0.1) gen_server.erl:1200: :gen_server.handle_msg/6
+    (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+Last message: {:terminate, #PID<0.3362.0>}
+State: %{}
+
+```
+
+Batting average is the most common way to compare hitting for variable numbers of at bats. Teruaki raised his battinga verage from .267 to .274 for the first half of this season compared to last. But the biggest change was going from .158 in the second half of last season to .244 this season. Yes, his production dropped from the first half, but it didn't fall off the cliff like it did in 2021.
+
+Also, while Sato greatly improved his batting average in 2022, the number of home runs he hit were down. He finished with just 20 home runs on the 2022 season, which is what he had during just the first half last season. Looking at it in a per-game perspective, Teruaki hit an amazing 2.3 home runs per 10 games in the first half of 2021. That dropped to 1.6 home runs per 10 games in 2022. For the second half of both seasons, he averaged just about 1 home run every 10 games.
+
+## Conclusion
+
+So what can be said about the All Star Break being a "turning point" for Teruaki Sato?
+
+Well, Teruaki did decline in the second half of both seasons. But whereas that decline was such that he lost playing time in 2021, he wasn't the lead weight on the Tigers' offense this past season as he was last year.

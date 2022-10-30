@@ -134,7 +134,8 @@ df
 |> DF.summarise(ResultType: [:count])
 |> DF.pivot_wider("ResultTypes", "ResultType_count", id_columns: ["Year", "Period"])
 |> DF.arrange(asc: "Year", asc: "Period")
-|> show_table.()
+# |> show_table.()
+|> DF.table()
 ```
 
 <!-- livebook:{"output":true} -->
@@ -164,6 +165,27 @@ warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instea
   (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
   (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
 
++-------------------------------------------------------------------------------------------------------------+
+|                                  Explorer DataFrame: [rows: 4, columns: 9]                                  |
++-----------+----------+-----------+-----------+-----------+-----------+-----------+-----------+--------------+
+|   Year    |  Period  |    hit    | strikeout |    out    |   walk    | sacrifice |   error   | hit-by-pitch |
+| <integer> | <string> | <integer> | <integer> | <integer> | <integer> | <integer> | <integer> |  <integer>   |
++===========+==========+===========+===========+===========+===========+===========+===========+==============+
+| 2021      | p1       | 83        | 121       | 104       | 16        | 1         | 3         | 2            |
++-----------+----------+-----------+-----------+-----------+-----------+-----------+-----------+--------------+
+| 2021      | p2       | 18        | 52        | 44        | 9         | 1         |           | 1            |
++-----------+----------+-----------+-----------+-----------+-----------+-----------+-----------+--------------+
+| 2022      | p1       | 99        | 87        | 171       | 31        | 5         | 4         | 3            |
++-----------+----------+-----------+-----------+-----------+-----------+-----------+-----------+--------------+
+| 2022      | p2       | 44        | 50        | 86        | 20        | 2         |           | 1            |
++-----------+----------+-----------+-----------+-----------+-----------+-----------+-----------+--------------+
+
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+:ok
 ```
 
 ```elixir
@@ -187,7 +209,8 @@ periods_df =
   |> DF.arrange(asc: "Period", asc: "Year")
 
 periods_df
-|> show_table.()
+# |> show_table.()
+|> DF.table()
 ```
 
 <!-- livebook:{"output":true} -->
@@ -201,6 +224,15 @@ warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instea
   (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
   (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
 
+
+21:41:07.105 [error] GenServer Kino.Terminator terminating
+** (FunctionClauseError) no function clause matching in Kino.Terminator.handle_info/2
+    (kino 0.7.0) lib/kino/terminator.ex:27: Kino.Terminator.handle_info({:terminate, #PID<0.310.0>}, %{})
+    (stdlib 4.0.1) gen_server.erl:1123: :gen_server.try_dispatch/4
+    (stdlib 4.0.1) gen_server.erl:1200: :gen_server.handle_msg/6
+    (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+Last message: {:terminate, #PID<0.310.0>}
+State: %{}
 warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instead
   (explorer 0.3.1) lib/explorer/data_frame.ex:1298: anonymous fn/3 in Explorer.DataFrame.df_for_mutations/2
   (elixir 1.14.0-rc.0) lib/enum.ex:2468: Enum."-reduce/3-lists^foldl/2-0-"/3
@@ -233,6 +265,27 @@ warning: mutate/2 with a callback is deprecated, please use mutate_with/2 instea
   (elixir 1.14.0-rc.0) src/elixir.erl:298: anonymous fn/4 in :elixir.eval_external_handler/1
   (stdlib 4.0.1) erl_eval.erl:748: :erl_eval.do_apply/7
 
++----------------------------------------------------------------------+
+|              Explorer DataFrame: [rows: 4, columns: 6]               |
++-----------+----------+-----------+-----------+-----------+-----------+
+|   Year    |  Period  |   Games   |  AtBats   |   Hits    | HomeRuns  |
+| <integer> | <string> | <integer> | <integer> | <integer> | <integer> |
++===========+==========+===========+===========+===========+===========+
+| 2021      | p1       | 84        | 311       | 83        | 20        |
++-----------+----------+-----------+-----------+-----------+-----------+
+| 2022      | p1       | 94        | 361       | 99        | 15        |
++-----------+----------+-----------+-----------+-----------+-----------+
+| 2021      | p2       | 42        | 114       | 18        | 4         |
++-----------+----------+-----------+-----------+-----------+-----------+
+| 2022      | p2       | 49        | 180       | 44        | 5         |
++-----------+----------+-----------+-----------+-----------+-----------+
+
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+:ok
 ```
 
 So after the season ended, I did a quick anaysis of Teruaki's career, breaking it down into four segments: before and after the All Star Break for the 2021 and 2022 seasons respectively. My initial analysis of Sato's performance between the four segments suffers from a lack of common denominator. That is, he played 10 more game in the first half of 2022 than 2021 and 7 more games in the second half of this season than last. While that may not be a differnce of a lot of games, it's 60 and 68 at bats different, respectively. So saying that his hit output improved by 16 while his home runs dropped by 5 for the first half and he had 26 more hits while only hitting one more home run in the second half leaves out a bit of context.
@@ -243,7 +296,43 @@ periods_df
 |> DF.mutate_with(&[HRperAB: Delta.divide(&1["HomeRuns"], &1["AtBats"])])
 |> DF.mutate_with(&[HRperG: Delta.divide(&1["HomeRuns"], &1["Games"])])
 |> DF.arrange(asc: "Period", asc: "Year")
-|> show_table.()
+# |> show_table.()
+|> DF.table()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+
+21:41:25.279 [error] GenServer Kino.Terminator terminating
+** (FunctionClauseError) no function clause matching in Kino.Terminator.handle_info/2
+    (kino 0.7.0) lib/kino/terminator.ex:27: Kino.Terminator.handle_info({:terminate, #PID<0.311.0>}, %{})
+    (stdlib 4.0.1) gen_server.erl:1123: :gen_server.try_dispatch/4
+    (stdlib 4.0.1) gen_server.erl:1200: :gen_server.handle_msg/6
+    (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+Last message: {:terminate, #PID<0.311.0>}
+State: %{}
++-----------------------------------------------------------------------------------------------------------------------------------------+
+|                                                Explorer DataFrame: [rows: 4, columns: 9]                                                |
++-----------+----------+-----------+-----------+-----------+-----------+---------------------+----------------------+---------------------+
+|   Year    |  Period  |   Games   |  AtBats   |   Hits    | HomeRuns  |         Avg         |       HRperAB        |       HRperG        |
+| <integer> | <string> | <integer> | <integer> | <integer> | <integer> |       <float>       |       <float>        |       <float>       |
++===========+==========+===========+===========+===========+===========+=====================+======================+=====================+
+| 2021      | p1       | 84        | 311       | 83        | 20        | 0.26688102893890675 | 0.06430868167202572  | 0.23809523809523808 |
++-----------+----------+-----------+-----------+-----------+-----------+---------------------+----------------------+---------------------+
+| 2022      | p1       | 94        | 361       | 99        | 15        | 0.2742382271468144  | 0.04155124653739612  | 0.1595744680851064  |
++-----------+----------+-----------+-----------+-----------+-----------+---------------------+----------------------+---------------------+
+| 2021      | p2       | 42        | 114       | 18        | 4         | 0.15789473684210525 | 0.03508771929824561  | 0.09523809523809523 |
++-----------+----------+-----------+-----------+-----------+-----------+---------------------+----------------------+---------------------+
+| 2022      | p2       | 49        | 180       | 44        | 5         | 0.24444444444444444 | 0.027777777777777776 | 0.10204081632653061 |
++-----------+----------+-----------+-----------+-----------+-----------+---------------------+----------------------+---------------------+
+
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+:ok
 ```
 
 So let's turn to percentages for comparisons. Batting average is the most common way to compare hitting for a variable numbers of at bats. Teruaki raised his batting average from .267 to .274 for the first half of this season compared to last. But the biggest change was going from .158 in the second half of last season to .244 this season. Yes, his production dropped from the first half, but it didn't fall off the cliff like it did in 2021.

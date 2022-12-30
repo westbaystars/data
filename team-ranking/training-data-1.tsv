@@ -1,4 +1,4 @@
-id	team	year	stats_league	is_pitcher	is_new	is_foreign	games_played	plate_appearances	singles	doubles	triples	home_runs	runs	strikeouts	bases_on_balls
+id	team	year	stats_league	is_pitcher	is_new	is_foreign	games_played	plate_appearances	singles	doubles	triples	home_runs	strikeouts	bases_on_balls	runs
 3163	han	2009	npb	true	false	false	32	200	29	0	0	8	34	9	17
 2970	orx	2009	npb	false	false	false	55	137	21	5	0	0	15	6	12
 419	hir	2009	npb	false	false	false	0	0	0	0	0	0	0	0	0

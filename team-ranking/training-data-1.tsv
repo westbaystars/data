@@ -10074,7 +10074,6 @@ id	team	year	stats_league	is_pitcher	is_new	is_foreign	games_played	plate_appear
 26247	rak	2022	npb	true	false	true	31	124	28	1	2	1	23	9	16
 36415	chu	2022	juniv	false	true	false	0	0	0	0	0	0	0	0	0
 22140	orx	2022	mlb	true	true	true	0	0	0	0	0	0	0	0	0
-10999	atl	2022	mlb	true	true	false	0	0	0	0	0	0	0	0	0
 22144	yak	2022	mlb	true	true	true	0	0	0	0	0	0	0	0	0
 34646	hir	2022	npb	true	false	true	50	269	42	6	0	8	79	28	31
 25739	orx	2022	npb	true	false	false	8	54	11	5	1	4	15	2	15
